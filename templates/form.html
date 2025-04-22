@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Reports</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <style>
+        body {
+            background-color: #f7f9fc;
+            padding-top: 40px;
+        }
+        .form-container {
+            max-width: 700px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+        }
+        .report-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            background-color: #f8f9fa;
+        }
+        .form-check-input {
+            margin-right: 10px;
+        }
+        textarea {
+            margin-top: 10px;
+        }
+        .is-invalid {
+            border: 1px solid red;
+            background-color: #fff0f0;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="form-container">
+        <h3 class="mb-4">Hello, {{ email }}</h3>
+        <p>Please select the reports you use and briefly describe what you use each for.</p>
+        <form id="reportForm" action="/submit" method="post">
+            <input type="hidden" name="email" value="{{ email }}">
+            
+            {% for report in reports %}
+            <div class="report-group">
+                <div class="form-check">
+                    <input class="form-check-input report-checkbox" type="checkbox" name="report" value="{{ report }}" id="report_{{ loop.index }}" data-report="{{ report }}">
+                    <label class="form-check-label fw-bold" for="report_{{ loop.index }}">
+                        {{ report }}
+                    </label>
+                </div>
+                <textarea class="form-control mt-2 report-reason" name="reason_{{ report }}" rows="2" placeholder="What do you use this report for?" data-report="{{ report }}"></textarea>
+            </div>
+            {% endfor %}
+
+            <!-- Submit Button (with custom validation) -->
+            <button type="button" class="btn btn-primary mt-3" id="validateBeforeSubmit">Submit</button>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for confirmation -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmModalLabel">Are you sure?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Please confirm that the information above is correct.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, keep editing</button>
+                <button type="button" class="btn btn-primary" id="confirmSubmitButton">Yes, submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for validation and modal control -->
+<script>
+    document.getElementById("validateBeforeSubmit").addEventListener("click", function () {
+        const checkboxes = document.querySelectorAll(".report-checkbox");
+        let valid = true;
+        let missingReasonFor = [];
+
+        checkboxes.forEach((checkbox) => {
+            const report = checkbox.dataset.report;
+            const textarea = document.querySelector(`textarea[data-report="${report}"]`);
+            if (checkbox.checked) {
+                if (!textarea.value.trim()) {
+                    valid = false;
+                    missingReasonFor.push(report);
+                    textarea.classList.add("is-invalid");
+                } else {
+                    textarea.classList.remove("is-invalid");
+                }
+            } else {
+                textarea.classList.remove("is-invalid");
+            }
+        });
+
+        if (!valid) {
+            alert("Please provide a reason for every selected report:\n- " + missingReasonFor.join("\n- "));
+            return;
+        }
+
+        const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"));
+        confirmModal.show();
+    });
+
+    document.getElementById("confirmSubmitButton").addEventListener("click", function () {
+        document.getElementById("reportForm").submit();
+    });
+</script>
+
+</body>
+</html>
