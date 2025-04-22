@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 DATA_FILE = "report.xlsx"
-RESPONSES_FILE = "responses.csv"
+RESPONSES_FILE = "responses.txt"  # Use Render's persistent directory
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -29,16 +29,18 @@ def index():
         # Fetch previous reasons for the reports
         previous_reasons = {}
         if os.path.exists(RESPONSES_FILE):
-            responses = pd.read_csv(RESPONSES_FILE)
-            previous_responses = responses[responses["Email"] == email_from_query]
-            for _, row in previous_responses.iterrows():
-                previous_reasons[row["Report"]] = row["Reason"]
+            with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+                for line in lines:
+                    if email_from_query in line:
+                        parts = line.strip().split(", ")
+                        report = parts[1].split(": ")[1]
+                        reason = parts[2].split(": ")[1]
+                        previous_reasons[report] = reason
 
         return render_template("form.html", email=email_from_query, reports=user_reports, selected_reports=user_reports, previous_reasons=previous_reasons)
 
     return render_template("login.html")
-
-
 
 # Route to handle the form submission
 @app.route("/submit", methods=["POST"])
@@ -49,22 +51,16 @@ def submit():
     if not selected_reports:
         return "No reports selected."
 
-    records = []
+    lines = []
     for report in selected_reports:
         reason_key = f"reason_{report}"
         reason = request.form.get(reason_key, "").strip()
-        records.append({
-            "Email": email,
-            "Report": report,
-            "Reason": f"reason: {reason}"
-        })
+        line = f"Email: {email}, Report: {report}, Reason: {reason}\n"
+        lines.append(line)
 
-    df = pd.DataFrame(records)
-
-    if os.path.exists(RESPONSES_FILE):
-        df.to_csv(RESPONSES_FILE, mode='a', index=False, header=False)
-    else:
-        df.to_csv(RESPONSES_FILE, index=False)
+    # Write responses to the persistent text file on Render
+    with open(RESPONSES_FILE, "a", encoding="utf-8") as f:
+        f.writelines(lines)
 
     # Hardcoded Thank You Page after submission
     return f"""
@@ -97,7 +93,7 @@ def submit():
     <div class="thank-you-box">
         <h2 class="mb-3 text-success">Thank you!</h2>
         <p>Your responses have been recorded for <strong>{email}</strong>.</p>
-        <a href="/?email={email}" <!-- Go back to form page with pre-filled data --></a>
+        <a href="/?email={email}">Return to form</a>
     </div>
 </body>
 </html>
