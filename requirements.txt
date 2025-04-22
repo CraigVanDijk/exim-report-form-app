@@ -1,6 +1,6 @@
-Flask==2.0.3
-gunicorn==20.1.0
-pandas==1.3.3  # Or any other dependencies your app uses
+Flask
+gunicorn
+pandas # Or any other dependencies your app uses
 openpyxl
 pywin32==308; sys_platform == "win32"
 # other dependencies
