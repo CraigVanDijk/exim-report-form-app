@@ -97,7 +97,7 @@ def submit():
     <div class="thank-you-box">
         <h2 class="mb-3 text-success">Thank you!</h2>
         <p>Your responses have been recorded for <strong>{email}</strong>.</p>
-        <a href="/?email={email}" </a>  <!-- Go back to form page with pre-filled data -->
+        <a href="/?email={email}" <!-- Go back to form page with pre-filled data --></a>
     </div>
 </body>
 </html>
