@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "eximreports",
+  "private_key_id": "103a43401cc02e7209258b2379e540f9074387b4",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCTs0PUaOmQAv+v\nyIIGD5/HER4vHJW4i8L/IiFYP/JpJ3NXIwYb6ykLgKL7/4fPmG0k3ERdBPZnlpjp\nSNDuD21c8dY9mKOJSnBUrPIlPPmIUbeulF4eQcyl4/Vxv+2nYokKIVSY0OJkCWPA\n913WrVIS0ndalREiZ4tdL2GOmrXnzX+P0RtxmGROxVUr6dpv/MA2cu+qyn931kLF\nhJA1KBVoua/azv44wZRWnDoRgG3fzOS28fdO5GQK4DsPaFfyZ0dD2OKsrkEiN8Xn\nWCIukHigtlF0l4KBu0q6f8ayKLxpgYSXZXmsAyCkDy8qFfbxFdH/ZOd/upUh2Nky\nkn34Ffw/AgMBAAECggEAKNX16XrOJJZnqeqmZFWah9fIQB9Hl9vwYEjH7lXTyFXz\nckKJNFvan8cDiOe33WIXvwq1TgCKvc4p3cnXlhIm2v00DhivEkzF7OtaEYiftxxc\nzARSV0w68BysJjR52P8Jw4a+lHegOCdOcLITvEB0Qib1f9JaB+iX4/4vG1XT+E/x\nrxBYZbYRhXUSI8JPL0Lza8pgFE3jHlJaXFKwIc7u0eonaWhxPBktgyUceo9K9t/1\nQzlGEYuaDCOozTrGJ17MQdbIbGTEEHsLluNWwdHT6C7ELJnJhPqOiLucmVRBC3Ac\ngRhGcUfyLAsO3NuALqYWjAthuQgCS4rrWNqkZzzKqQKBgQDEGzBVs//ULEsjP0k8\n2ID4rzYYVBVXpXYmkfe6RI8/Xgcwv+7/5mIH0OuTN6OLfVwHJZ9BrcoWuSRzg/2c\npmGBq1TYgMTCQPh72gxdP2OzpWa5JeUHfIXhVlbIcYEOiOyYvZ0VWiHGGa87gc/1\nkLUFJf5O/Ic3pnmYYXF7DqTzRwKBgQDAz2VK1F8XpaiQKc+va7nSYe824TAYWvLA\n6kW6XHd0tMaN47Zs9C4ltlF+vO5YwdZMcBtM/VvkVaiF9He+3MMKoBS7d3YPVuvc\nJAszSDfULTlk5yv0fidpBRLictr5Z7X5vjxHnf3fYEpAeYne5qhttN9rE6Oq2wLs\n7O8QUkr7SQKBgGeqR77GTDKIx592UOzNNkA/vsTVjgKrAO4as23P2DmTJxHqJBk6\nXA/trNpByz5tojxU8v7xM6cXb+FwoJwyh9DYFR3t1BUr6y7tcSPJ4paQlODC23M9\nrDgWQAHtnl9kmk2Tznn/D2N9KFi4oooZWNfD4c83RvNwGU8oE6kNcLz5AoGAUtUG\npCYmkCcoCn8b7TXvh9VxCnelzODNp1k+CXkODMJZBr4MMjSY2rS/wB30m4byxLXo\n1KOH5cly89F53DJFTHxHS95fhumFvHZzpV1iNrITFSlHNes4jSKT4VsMfdczU46J\noQ7b8SoR3C8arvsS4sawsPSn/I/IavbDIZTpB5kCgYALTk2eW2boALJycfy3h492\nWkiJi/udro96gjxx8WhTczQBp7iHADvJM10FQdZdPYL5QfHA2h4acQLQt2wbSej2\nhP/NvDhFuCD9/9qaR+YF2fHbR9+NcwjX9DawFLBi/pPIB2U4xcXgABBFVIYNmFwA\n24xtWQtKCzA4Ii/o65hPaA==\n-----END PRIVATE KEY-----\n",
+  "client_email": "eximreportsserviceaccount@eximreports.iam.gserviceaccount.com",
+  "client_id": "108901593283945606442",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/eximreportsserviceaccount%40eximreports.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
