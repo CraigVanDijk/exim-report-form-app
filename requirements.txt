@@ -2,5 +2,6 @@ Flask
 gunicorn
 pandas # Or any other dependencies your app uses
 openpyxl
+gspread
 pywin32==308; sys_platform == "win32"
 # other dependencies
