@@ -1,45 +1,10 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request
 import pandas as pd
-import gspread
-from oauth2client.service_account import ServiceAccountCredentials
-from google.cloud import secretmanager
-import json
 import os
 
 app = Flask(__name__)
 DATA_FILE = "report.xlsx"
 RESPONSES_FILE = "responses.txt"  # Use Render's persistent directory
-
-# Google Sheets setup
-SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-
-
-def get_secret(secret_name: str):
-    # Create the client for Secret Manager
-    client = secretmanager.SecretManagerServiceClient()
-
-    # Access the secret version
-    secret_version = f"projects/108688698374/secrets/exim-reports-credentials/versions/1"
-    response = client.access_secret_version(name=secret_version)
-
-    # The payload is in 'response.payload.data' as bytes
-    secret_data = response.payload.data.decode('UTF-8')
-
-    # Parse the secret JSON into a dictionary
-    creds_dict = json.loads(secret_data)
-    
-    return creds_dict
-
-# Use the function to get your secret and parse it into a dictionary
-creds_dict = get_secret('exim-reports-credentials')
-
-# Replace literal `\n` with real newlines
-creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
-# Use the credentials directly
-CREDS = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
-gs_client = gspread.authorize(CREDS)
-SHEET = gs_client.open("UserFormMapping").sheet1  # Change to your sheet name
-
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -134,12 +99,6 @@ def submit():
     # Write responses to file
     with open(RESPONSES_FILE, "a", encoding="utf-8") as f:
         f.writelines(lines)
-        # Also write to Google Sheets
-    for line in lines:
-        parts = line.strip().split(", ")
-        row = [part.split(": ")[1] for part in parts]  # Extract values: email, report, reason
-        SHEET.append_row(row)
-
 
     # Hardcoded Thank You Page after submission
     return f"""
@@ -159,7 +118,7 @@ def submit():
             height: 100vh;
             font-family: Arial, sans-serif;
         }}
-        .thank-you-box {{
+        .thank-you {{
             background: white;
             padding: 2rem 3rem;
             border-radius: 1rem;
@@ -169,10 +128,9 @@ def submit():
     </style>
 </head>
 <body>
-    <div class="thank-you-box">
-        <h2 class="mb-3 text-success">Thank you!</h2>
-        <p>Your responses have been recorded for <strong>{email}</strong>.</p>
-        <a href="/?email={email}"></a>
+    <div class="thank-you">
+        <h2 class="mb-3 text-success">Thank you for your submission!</h2>
+        <p>Your responses have been recorded.</p>
     </div>
 </body>
 </html>
