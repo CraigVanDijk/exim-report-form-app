@@ -4,5 +4,6 @@ pandas # Or any other dependencies your app uses
 openpyxl
 gspread
 oauth2client
+json
 pywin32==308; sys_platform == "win32"
 # other dependencies
