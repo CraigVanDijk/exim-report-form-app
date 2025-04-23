@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for
 import pandas as pd
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
+from google.cloud import secretmanager
 import json
 import os
 
@@ -12,9 +13,31 @@ RESPONSES_FILE = "responses.txt"  # Use Render's persistent directory
 # Google Sheets setup
 SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
-CREDS = ServiceAccountCredentials.from_json_keyfile_name("eximreports-103a43401cc0.json", SCOPE)
-gs_client = gspread.authorize(CREDS)
 
+def get_secret(secret_name: str):
+    # Create the client for Secret Manager
+    client = secretmanager.SecretManagerServiceClient()
+
+    # Access the secret version
+    secret_version = f"projects/108688698374/secrets/exim-reports-credentials/versions/1"
+    response = client.access_secret_version(name=secret_version)
+
+    # The payload is in 'response.payload.data' as bytes
+    secret_data = response.payload.data.decode('UTF-8')
+
+    # Parse the secret JSON into a dictionary
+    creds_dict = json.loads(secret_data)
+    
+    return creds_dict
+
+# Use the function to get your secret and parse it into a dictionary
+creds_dict = get_secret('exim-reports-credentials')
+
+# Replace literal `\n` with real newlines
+creds_dict["private_key"] = creds_dict["private_key"].replace("\\n", "\n")
+# Use the credentials directly
+CREDS = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, SCOPE)
+gs_client = gspread.authorize(CREDS)
 SHEET = gs_client.open("UserFormMapping").sheet1  # Change to your sheet name
 
 
