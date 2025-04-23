@@ -55,8 +55,14 @@
                 </div>
                 <textarea class="form-control mt-2 report-reason" name="reason_{{ report }}" rows="2" placeholder="What do you use this report for?" data-report="{{ report }}"></textarea>
             </div>
-            {% endfor %}
 
+            {% endfor %}
+            <!-- "I don't use any of these reports" Button -->
+            <div class="text-center mt-4">
+                <button type="button" class="btn btn-outline-secondary" id="noReportsButton">
+                    I don't use any of these reports
+                </button>
+            </div>
             <!-- Submit Button (with custom validation) -->
             <button type="button" class="btn btn-primary mt-3" id="validateBeforeSubmit">Submit</button>
         </form>
@@ -113,6 +119,37 @@
         const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"));
         confirmModal.show();
     });
+
+    document.getElementById("noReportsButton").addEventListener("click", function () {
+    const checkboxes = document.querySelectorAll(".report-checkbox");
+    const textareas = document.querySelectorAll(".report-reason");
+
+    // Uncheck all checkboxes
+    checkboxes.forEach((cb) => cb.checked = false);
+
+    // Clear all textareas and remove validation classes
+    textareas.forEach((ta) => {
+        ta.value = "";
+        ta.classList.remove("is-invalid");
+    });
+
+    // Add hidden input to signal 'no reports used'
+    let form = document.getElementById("reportForm");
+    let existingHidden = document.querySelector('input[name="no_reports_used"]');
+    if (!existingHidden) {
+        let hiddenInput = document.createElement("input");
+        hiddenInput.type = "hidden";
+        hiddenInput.name = "no_reports_used";
+        hiddenInput.value = "true";
+        form.appendChild(hiddenInput);
+    }
+
+    // Show the confirmation modal
+    const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"));
+    confirmModal.show();
+});
+
+
 
     document.getElementById("confirmSubmitButton").addEventListener("click", function () {
         document.getElementById("reportForm").submit();
