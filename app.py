@@ -4,7 +4,7 @@ import os
 
 app = Flask(__name__)
 DATA_FILE = "report.xlsx"
-RESPONSES_FILE = "responses.txt"  # Use Render's persistent directory
+RESPONSES_FILE = "/mnt/data/responses.txt"  # Use Render's persistent directory
 
 @app.route("/", methods=["GET", "POST"])
 def index():
