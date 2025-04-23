@@ -12,7 +12,7 @@ RESPONSES_FILE = "responses.txt"  # Use Render's persistent directory
 # Google Sheets setup
 SCOPE = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
 
-CREDS = ServiceAccountCredentials.from_json_keyfile_name(r"C:\Users\CraigVD\Downloads\ReportsProject\eximreports-103a43401cc0.json", SCOPE)
+CREDS = ServiceAccountCredentials.from_json_keyfile_name("eximreports-103a43401cc0.json", SCOPE)
 gs_client = gspread.authorize(CREDS)
 
 SHEET = gs_client.open("UserFormMapping").sheet1  # Change to your sheet name
