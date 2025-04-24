@@ -1,10 +1,26 @@
 from flask import Flask, render_template, request
 import pandas as pd
 import os
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
+from dotenv import load_dotenv
 
 app = Flask(__name__)
-DATA_FILE = "report.xlsx"
-RESPONSES_FILE = "/mnt/data/responses.txt"  # Use Render's persistent directory
+
+load_dotenv()  # Load from .env
+
+GOOGLE_CREDENTIALS_PATH = os.getenv("GOOGLE_CREDENTIALS_PATH")
+GOOGLE_SHEET_NAME = os.getenv("GOOGLE_SHEET_NAME")
+DATA_FILE = os.getenv("DATA_FILE")
+
+scope = ['https://www.googleapis.com/auth/spreadsheets', 'https://www.googleapis.com/auth/drive']
+creds = ServiceAccountCredentials.from_json_keyfile_name(GOOGLE_CREDENTIALS_PATH, scope)
+client = gspread.authorize(creds)
+
+print("DEBUG - GOOGLE_CREDENTIALS_PATH:", GOOGLE_CREDENTIALS_PATH)
+
+
+sheet = client.open(GOOGLE_SHEET_NAME).sheet1
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -62,43 +78,69 @@ def index():
 
         # Fetch previous reasons for the reports
         previous_reasons = {}
-        if os.path.exists(RESPONSES_FILE):
-            with open(RESPONSES_FILE, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-                for line in lines:
-                    if email_from_query in line:
-                        parts = line.strip().split(", ")
-                        report = parts[1].split(": ")[1]
-                        reason = parts[2].split(": ")[1]
-                        previous_reasons[report] = reason
+        # Add your previous reason fetching logic here...
 
         return render_template("form.html", email=email_from_query, reports=user_reports, selected_reports=user_reports, previous_reasons=previous_reasons)
 
     return render_template("login.html")
 
-# Route to handle the form submission
+# Route to handle the form submission and write to Google Sheets
 @app.route("/submit", methods=["POST"])
 def submit():
     email = request.form.get("email", "").strip().lower()
     selected_reports = request.form.getlist("report")
 
+    # Handle "no reports used" case
     lines = []
 
-    # Handle "no reports used" case
     if request.form.get("no_reports_used") == "true":
-        lines.append(f"Email: {email}, Report: NONE, Reason: I don't use any of these reports\n")
+        lines.append([email, "NONE", "I don't use any of these reports"])
     else:
         if not selected_reports:
-            return "No reports selected."
+            return f"""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>No Reports Selected</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {{
+            background-color: #f8f9fa;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: Arial, sans-serif;
+        }}
+        .thank-you {{
+            background: white;
+            padding: 2rem 3rem;
+            border-radius: 1rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }}
+    </style>
+</head>
+<body>
+    <div class="thank-you">
+        <h2 class="mb-3 text-success">No reports selected</h2>
+        <p>Please select at least one report or indicate that you don’t use any of them.</p>
+        <a href="/" class="btn btn-primary mt-3">Go Back</a>
+    </div>
+</body>
+</html>
+"""
 
         for report in selected_reports:
             reason_key = f"reason_{report}"
             reason = request.form.get(reason_key, "").strip()
-            lines.append(f"Email: {email}, Report: {report}, Reason: {reason}\n")
+            lines.append([email, report, reason])
 
-    # Write responses to file
-    with open(RESPONSES_FILE, "a", encoding="utf-8") as f:
-        f.writelines(lines)
+    # Write responses to Google Sheets
+    for line in lines:
+        sheet.append_row(line)  # Add a new row for each response
 
     # Hardcoded Thank You Page after submission
     return f"""
@@ -135,6 +177,11 @@ def submit():
 </body>
 </html>
 """
+
+@app.route("/responses", methods=["GET"])
+def view_responses():
+    # You can render responses directly from Google Sheets or local file, as needed
+    return "Responses viewing page coming soon!"
 
 if __name__ == "__main__":
     app.run(debug=True)
