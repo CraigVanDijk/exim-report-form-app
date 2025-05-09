@@ -45,7 +45,7 @@
         <p>Please select the reports you use and briefly describe what you use each for.</p>
         <form id="reportForm" action="/submit" method="post">
             <input type="hidden" name="email" value="{{ email }}">
-            
+
             {% for report in reports %}
             <div class="report-group">
                 <div class="form-check">
@@ -58,12 +58,26 @@
             </div>
             {% endfor %}
 
-            <!-- "I don't use any of these reports" Button -->
-            <div class="text-center mt-4">
-                <button type="button" class="btn btn-outline-secondary" id="noReportsButton">
-                    I don't use any of these reports
-                </button>
+        <!-- New Block: I use other reports -->
+        <div class="report-group">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="otherReportsCheckbox" name="uses_other_reports">
+                <label class="form-check-label fw-bold" for="otherReportsCheckbox">
+                    I use other reports
+                </label>
             </div>
+            <textarea class="form-control mt-2 report-reason" id="otherReportsReason" name="other_reports_reason" rows="2" placeholder="Please describe the other reports you use"></textarea>
+        </div>
+
+        <!-- New Block: I don't use any of these reports -->
+        <div class="report-group">
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="noReportsCheckbox" name="no_reports_used">
+                <label class="form-check-label fw-bold" for="noReportsCheckbox">
+                    I don't use any of these reports
+                </label>
+            </div>
+        </div>
 
             <!-- Submit Button (with custom validation) -->
             <button type="button" class="btn btn-primary mt-3" id="validateBeforeSubmit">Submit</button>
@@ -90,9 +104,8 @@
     </div>
 </div>
 
-<!-- JavaScript for validation and modal control -->
 <script>
-    // Show/hide textareas when checkboxes change
+    // Toggle individual report textareas
     document.querySelectorAll(".report-checkbox").forEach((checkbox) => {
         checkbox.addEventListener("change", function () {
             const report = this.dataset.report;
@@ -104,23 +117,57 @@
                 textarea.value = "";
                 textarea.classList.remove("is-invalid");
             }
+
+            // Uncheck "noReportsCheckbox" if any report is checked
+            if (this.checked) {
+                document.getElementById("noReportsCheckbox").checked = false;
+            }
         });
     });
 
-    // Custom form validation before showing modal
+    // Toggle "other reports" textarea
+    const otherReportsCheckbox = document.getElementById("otherReportsCheckbox");
+    const otherReportsReason = document.getElementById("otherReportsReason");
+    otherReportsCheckbox.addEventListener("change", function () {
+        if (this.checked) {
+            otherReportsReason.style.display = "block";
+            document.getElementById("noReportsCheckbox").checked = false;
+        } else {
+            otherReportsReason.style.display = "none";
+            otherReportsReason.value = "";
+            otherReportsReason.classList.remove("is-invalid");
+        }
+    });
+
+    // Handle "I don't use any reports" logic
+    document.getElementById("noReportsCheckbox").addEventListener("change", function () {
+        if (this.checked) {
+            // Uncheck all report checkboxes
+            document.querySelectorAll(".report-checkbox, #otherReportsCheckbox").forEach((cb) => {
+                cb.checked = false;
+            });
+
+            // Hide and clear all textareas
+            document.querySelectorAll(".report-reason").forEach((ta) => {
+                ta.style.display = "none";
+                ta.value = "";
+                ta.classList.remove("is-invalid");
+            });
+        }
+    });
+
+    // Form validation and modal trigger
     document.getElementById("validateBeforeSubmit").addEventListener("click", function () {
         const checkboxes = document.querySelectorAll(".report-checkbox");
         let valid = true;
-        let missingReasonFor = [];
 
         checkboxes.forEach((checkbox) => {
             const report = checkbox.dataset.report;
             const textarea = document.querySelector(`textarea[data-report="${report}"]`);
             if (checkbox.checked) {
                 if (!textarea.value.trim()) {
-                    valid = false;
-                    missingReasonFor.push(report);
                     textarea.classList.add("is-invalid");
+                    valid = false;
                 } else {
                     textarea.classList.remove("is-invalid");
                 }
@@ -129,8 +176,13 @@
             }
         });
 
+        if (otherReportsCheckbox.checked && !otherReportsReason.value.trim()) {
+            otherReportsReason.classList.add("is-invalid");
+            valid = false;
+        }
+
         if (!valid) {
-            alert("Please provide a reason for every selected report:\n- " + missingReasonFor.join("\n- "));
+            alert("Please provide a reason for every selected report.");
             return;
         }
 
@@ -138,39 +190,15 @@
         confirmModal.show();
     });
 
-    // Handle 'I don't use any reports' button
-    document.getElementById("noReportsButton").addEventListener("click", function () {
-        const checkboxes = document.querySelectorAll(".report-checkbox");
-        const textareas = document.querySelectorAll(".report-reason");
-
-        // Uncheck all and hide/clear textareas
-        checkboxes.forEach((cb) => cb.checked = false);
-        textareas.forEach((ta) => {
-            ta.value = "";
-            ta.style.display = "none";
-            ta.classList.remove("is-invalid");
-        });
-
-        // Add hidden input to indicate no reports used
-        let form = document.getElementById("reportForm");
-        let existingHidden = document.querySelector('input[name="no_reports_used"]');
-        if (!existingHidden) {
-            let hiddenInput = document.createElement("input");
-            hiddenInput.type = "hidden";
-            hiddenInput.name = "no_reports_used";
-            hiddenInput.value = "true";
-            form.appendChild(hiddenInput);
-        }
-
-        const confirmModal = new bootstrap.Modal(document.getElementById("confirmModal"));
-        confirmModal.show();
-    });
-
-    // Submit form on confirm
+    // Final submission
     document.getElementById("confirmSubmitButton").addEventListener("click", function () {
         document.getElementById("reportForm").submit();
     });
+
+    // Initialize hidden state on load
+    otherReportsReason.style.display = "none";
 </script>
+
 
 </body>
 </html>
