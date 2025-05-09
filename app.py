@@ -84,19 +84,30 @@ def index():
 
     return render_template("login.html")
 
-# Route to handle the form submission and write to Google Sheets
 @app.route("/submit", methods=["POST"])
 def submit():
     email = request.form.get("email", "").strip().lower()
     selected_reports = request.form.getlist("report")
-
-    # Handle "no reports used" case
     lines = []
 
-    if request.form.get("no_reports_used") == "true":
+    # 1. If "I don't use any of these reports" is selected, record only that and return Thank You
+    if request.form.get("no_reports_used"):
         lines.append([email, "NONE", "I don't use any of these reports"])
     else:
-        if not selected_reports:
+        # 2. If standard reports are selected, collect them
+        if selected_reports:
+            for report in selected_reports:
+                reason_key = f"reason_{report}"
+                reason = request.form.get(reason_key, "").strip()
+                lines.append([email, report, reason])
+
+        # 3. If "I use other reports" is selected, record that too
+        if request.form.get("uses_other_reports"):
+            other_reason = request.form.get("other_reports_reason", "").strip()
+            lines.append([email, "OTHER", other_reason])
+
+        # 4. If nothing was selected at all, return error page
+        if not selected_reports and not request.form.get("uses_other_reports"):
             return f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -125,7 +136,7 @@ def submit():
 </head>
 <body>
     <div class="thank-you">
-        <h2 class="mb-3 text-success">No reports selected</h2>
+        <h2 class="mb-3 text-danger">No reports selected</h2>
         <p>Please select at least one report or indicate that you don’t use any of them.</p>
         <a href="/" class="btn btn-primary mt-3">Go Back</a>
     </div>
@@ -133,16 +144,11 @@ def submit():
 </html>
 """
 
-        for report in selected_reports:
-            reason_key = f"reason_{report}"
-            reason = request.form.get(reason_key, "").strip()
-            lines.append([email, report, reason])
-
-    # Write responses to Google Sheets
+    # Write all collected responses to Google Sheets
     for line in lines:
-        sheet.append_row(line)  # Add a new row for each response
+        sheet.append_row(line)
 
-    # Hardcoded Thank You Page after submission
+    # Show thank you page
     return f"""
 <!DOCTYPE html>
 <html lang="en">
@@ -177,6 +183,8 @@ def submit():
 </body>
 </html>
 """
+
+
 
 @app.route("/responses", methods=["GET"])
 def view_responses():
