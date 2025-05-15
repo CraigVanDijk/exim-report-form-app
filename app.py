@@ -184,12 +184,5 @@ def submit():
 </html>
 """
 
-
-
-@app.route("/responses", methods=["GET"])
-def view_responses():
-    # You can render responses directly from Google Sheets or local file, as needed
-    return "Responses viewing page coming soon!"
-
 if __name__ == "__main__":
     app.run(debug=True)
